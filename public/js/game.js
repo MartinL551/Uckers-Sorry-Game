@@ -153,6 +153,33 @@ class gameScene extends Phaser.Scene {
 
             }
 
+            for (let i = 0; i < 4; i++) {
+                let newPiece = {}
+
+                if (i === 0) {
+                    newPiece = new piece(i + 30, 128, 704, 4, add.image(96, 96, 'redPiece'))
+                }
+
+                if (i === 1) {
+                    newPiece = new piece(i + 30, 192, 768, 4, add.image(96, 96, 'redPiece'))
+                }
+
+                if (i === 2) {
+                    newPiece = new piece(i + 30, 128, 768, 4, add.image(96, 96, 'redPiece'))
+                }
+
+                if (i === 3) {
+                    newPiece = new piece(i + 30, 192, 704, 4, add.image(96, 96, 'redPiece'))
+                }
+
+                console.log(newPiece)
+
+                newPiece.sprite.setInteractive();
+                newPiece.sprite.setPosition(newPiece.x + 32, newPiece.y + 32)
+                piecesState.push(newPiece)
+
+            }
+
 
             gameGrid.forEach((row) => {
                 row.forEach((gridTile) => {
