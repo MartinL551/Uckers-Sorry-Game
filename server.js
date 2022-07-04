@@ -8,5 +8,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(8080, () => {
-  console.log('server listening on httpl://localhost:8080');
+  console.log('server listening on http://localhost:8080');
 });
