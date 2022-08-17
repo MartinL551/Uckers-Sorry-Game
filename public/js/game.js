@@ -130,19 +130,19 @@ class gameScene extends Phaser.Scene {
                 let newPiece = {}
 
                 if (i === 0) {
-                    newPiece = new piece(i + 20, 704, 128, 4, add.image(96, 96, 'yellowPiece'))
+                    newPiece = new piece(i + 20, 704, 128, 3, add.image(96, 96, 'yellowPiece'))
                 }
 
                 if (i === 1) {
-                    newPiece = new piece(i + 20, 768, 128, 4, add.image(96, 96, 'yellowPiece'))
+                    newPiece = new piece(i + 20, 768, 128, 3, add.image(96, 96, 'yellowPiece'))
                 }
 
                 if (i === 2) {
-                    newPiece = new piece(i + 20, 704, 192, 4, add.image(96, 96, 'yellowPiece'))
+                    newPiece = new piece(i + 20, 704, 192, 3, add.image(96, 96, 'yellowPiece'))
                 }
 
                 if (i === 3) {
-                    newPiece = new piece(i + 20, 768, 192, 4, add.image(96, 96, 'yellowPiece'))
+                    newPiece = new piece(i + 20, 768, 192, 3, add.image(96, 96, 'yellowPiece'))
                 }
 
                 console.log(newPiece)
@@ -157,19 +157,19 @@ class gameScene extends Phaser.Scene {
                 let newPiece = {}
 
                 if (i === 0) {
-                    newPiece = new piece(i + 30, 128, 704, 4, add.image(96, 96, 'redPiece'))
+                    newPiece = new piece(i + 30, 128, 704, 5, add.image(96, 96, 'redPiece'))
                 }
 
                 if (i === 1) {
-                    newPiece = new piece(i + 30, 192, 768, 4, add.image(96, 96, 'redPiece'))
+                    newPiece = new piece(i + 30, 192, 768, 5, add.image(96, 96, 'redPiece'))
                 }
 
                 if (i === 2) {
-                    newPiece = new piece(i + 30, 128, 768, 4, add.image(96, 96, 'redPiece'))
+                    newPiece = new piece(i + 30, 128, 768, 5, add.image(96, 96, 'redPiece'))
                 }
 
                 if (i === 3) {
-                    newPiece = new piece(i + 30, 192, 704, 4, add.image(96, 96, 'redPiece'))
+                    newPiece = new piece(i + 30, 192, 704, 5, add.image(96, 96, 'redPiece'))
                 }
 
                 console.log(newPiece)
@@ -305,21 +305,7 @@ class gameScene extends Phaser.Scene {
         this.dragObj.x = this.dragObj.x - (this.dragObj.x % 64) + 32;
         this.dragObj.y = this.dragObj.y - (this.dragObj.y % 64) + 32;
 
-        //let curPieces = this.piecesState.filter((piece) => {
-        //    console.log("DragObjX", piece.x)
-        //    console.log("DragObjY", piece.y)
-        //    console.log("OrignalX", this.originalX)
-        //    console.log("OriginalY", this.originalY)
-        //    console.log(piece.x === this.originalX && piece.y === this.originalY)
-        //    if (piece.x === this.originalX && piece.y === this.originalY) {
-        //        return true
-        //    }
-        //})
-        //console.log("Found Pieces", curPieces)
-
-        //if (curPieces.length === 0) {
-        //    return true
-        //}
+     
 
         let curPiece = {}
 
@@ -390,6 +376,12 @@ class gameScene extends Phaser.Scene {
         console.log(this.gameGrid)
     }
 
+    checkPieceTeams(gridTile, curPiece) {
+        gridTile.forEach(piece => {
+            if()
+        })
+    }
+
     clearPieceFromGameState(pieceId) {
 
         this.gameGrid.forEach(row => row.forEach(gridTile => {
@@ -415,6 +407,8 @@ class gameScene extends Phaser.Scene {
     updatePieceUI(gridTile) {
         let noOfGreen = 0
         let noOfBlue = 0
+        let noOfRed = 0
+        let noOfYellow = 0
 
         if (gridTile.text != undefined) {
             gridTile.text.destroy()
@@ -429,17 +423,28 @@ class gameScene extends Phaser.Scene {
                 noOfGreen++
             } else if (piece.type === 4) {
                 noOfBlue++
+            } else if (piece.type === 3) {
+                noOfYellow++
+            } else if (piece.type === 5) {
+                noOfRed++
             }
         })
         if (noOfGreen >= 1 && noOfBlue >= 1) {
             console.log("mixiBlob")
-            this.changeMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1])
+            this.changeMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1], "mixBlueandGreen")
             this.putNumberOnPieceTwoColor(gridTile, noOfBlue, noOfGreen)
+        } else if (noOfRed >= 1 && noOfYellow >= 1) {
+            this.changeMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1], "mixRedandYellow")
+            this.putNumberOnPieceTwoColor(gridTile, noOfRed, noOfYellow)
         } else {
             if (noOfGreen > 1) {
                 this.putNumberOnPieceOneColor(gridTile, noOfGreen)
             } else if (noOfBlue > 1) {
                 this.putNumberOnPieceOneColor(gridTile, noOfBlue)
+            } else if (noOfYellow > 1) {
+                this.putNumberOnPieceOneColor(gridTile, noOfYellow)
+            } else if (noOfRed > 1) {
+                this.putNumberOnPieceOneColor(gridTile, noOfRed)
             }
         }
 
@@ -462,9 +467,9 @@ class gameScene extends Phaser.Scene {
         gridTile.text = pieceNo;
     }
 
-    changeMixiBlobsImage(piece) {
+    changeMixiBlobsImage(piece, imgTag) {
         console.log("pieceImageToChange", piece)
-        piece.sprite.setTexture("mixBlueandGreen")
+        piece.sprite.setTexture(imgTag)
         piece.sprite.setDepth(0.9)
     }
 
@@ -474,6 +479,10 @@ class gameScene extends Phaser.Scene {
             piece.sprite.setTexture("greenPiece")
         } else if (piece.type === 4) {
             piece.sprite.setTexture("bluePiece")
+        } else if (piece.type === 3) {
+            piece.sprite.setTexture("yellowPiece")
+        } else if (piece.type === 5) {
+            piece.sprite.setTexture("redPiece")
         }
         piece.sprite.setDepth(0)
     }
