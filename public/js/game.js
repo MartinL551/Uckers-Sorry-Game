@@ -194,7 +194,7 @@ class gameScene extends Phaser.Scene {
 
         }
 
-       
+
 
         gridMap.forEach((row, i) => {
             let rowArr = [];
@@ -226,7 +226,7 @@ class gameScene extends Phaser.Scene {
                     let dice2Text = this.add.text(j * 64 + 192, i * 64, "1", { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif', fontSize: "32px" }).setOrigin(0, 0)
 
                     rectangle.setInteractive()
-                    rollText.setPadding({ top: 10, left: 3 }); 
+                    rollText.setPadding({ top: 10, left: 3 });
                     dice1Text.setPadding({ top: 10, left: 5 })
                     dice2Text.setPadding({ top: 10, left: 5 })
                     rectangle.setStrokeStyle(4, 0x000000)
@@ -249,7 +249,7 @@ class gameScene extends Phaser.Scene {
 
         initState(this.add, this.piecesState, this.gameGrid)
         this.input.on('pointerdown', this.startDrag, this);
-    }  
+    }
 
     checkGridandPieceType(piece, gridTile) {
         if (gridTile.type === piece.type ^ gridTile.type === 1) {
@@ -284,18 +284,18 @@ class gameScene extends Phaser.Scene {
         this.dragObj = targets[0];
         if (this.dragObj.type !== "Rectangle") {
             this.input.off('pointerdown', this.startDrag, this);
-            
+
             console.log("dragObjis", this.dragObj)
             this.input.on('pointermove', this.doDrag, this);
             this.input.on('pointerup', this.stopDrag, this);
             this.originalX = this.dragObj.x - (this.dragObj.x % 64)
             this.originalY = this.dragObj.y - (this.dragObj.y % 64)
         }
-      
+
     }
 
     doDrag(pointer) {
-        
+
         this.dragObj.x = pointer.x;
         this.dragObj.y = pointer.y;
     }
@@ -306,52 +306,69 @@ class gameScene extends Phaser.Scene {
         this.dragObj.x = this.dragObj.x - (this.dragObj.x % 64) + 32;
         this.dragObj.y = this.dragObj.y - (this.dragObj.y % 64) + 32;
 
-     
+
 
         let curPiece = {}
 
-        
+
 
         this.gameGrid.forEach((row) => {
             row.forEach(gridTile => {
-         
+
                 if (gridTile.x === this.originalX && gridTile.y === this.originalY) {
 
-                    curPiece = gridTile.pieces[gridTile.pieces.length - 1]   
-                    
+                    curPiece = gridTile.pieces[gridTile.pieces.length - 1]
+
                 }
             })
         })
 
-        
+
 
         this.gameGrid.forEach((row) => {
             row.forEach((gridTile) => {
                 if (gridTile.x === this.dragObj.x - 32 && gridTile.y === this.dragObj.y - 32) {
 
                     console.log("curPiece", curPiece)
-                    
-                    if (this.checkGridandPieceType(curPiece, gridTile)) {
+                    let BlobType = this.isMixiBlob(gridTile)
+                    let CheckIfBlobSameTeam = true
+
+                    if (BlobType.type === "pureBlob") {
+
+                        if ((curPiece.type === 4 || curPiece.type === 2) && (BlobType.redCount >= 1 || BlobType.yellowCount >= 1) ) {
+                            CheckIfBlobSameTeam = false
+                        }
+                        if ((curPiece.type === 3 || curPiece.type === 5) && (BlobType.blueCount >= 1 || BlobType.greenCount >= 1)) {
+                            CheckIfBlobSameTeam = false
+                        }
+                    }
+
+                    if (this.checkGridandPieceType(curPiece, gridTile) && CheckIfBlobSameTeam) {
                         console.log()
                         this.clearPieceFromGameState(curPiece.id)
                         gridTile.pieces.push(curPiece);
-                        this.setSpriteToTopOfStack(gridTile);
-                        
-                        if (this.checkPieceTeams(gridTile, curPiece)) {
-                            if (curPiece.type === 3 || curPiece.type === 5) {
-                                
-                                for (let i = gridTile.pieces.length - 1; i >= 0 ; i--) {
-                                    console.log("Gridtile Pieces", gridTile.pieces) 
-                                    if (gridTile.pieces[i].type === 2 || gridTile.pieces[i].type === 4) {
-                                        this.sendPieceToStart(gridTile.pieces[i])
-                                        console.log("Piece", gridTile.pieces[i])
-                                        gridTile.pieces.splice(i, 1)
+
+                        if (this.isMixiBlob(gridTile).type === "mixBlueandGreen") {
+                            if (this.checkPieceTeams(gridTile, curPiece)) {
+                                if (curPiece.type === 3 || curPiece.type === 5) {
+
+                                    for (let i = gridTile.pieces.length - 1; i >= 0; i--) {
+                                        console.log("Gridtile Pieces", gridTile.pieces)
+                                        if (gridTile.pieces[i].type === 2 || gridTile.pieces[i].type === 4) {
+                                            console.log("Piece", gridTile.pieces[i])
+                                            this.sendPieceToStart(gridTile.pieces[i])
+
+                                            gridTile.pieces.splice(i, 1)
+                                        }
                                     }
+
+
                                 }
-                                
                             }
                         }
-                           
+                        
+                        this.setSpriteToTopOfStack(gridTile)
+
                        }
                     else {
 
@@ -367,13 +384,13 @@ class gameScene extends Phaser.Scene {
                                 this.piecesState[i].y = curPiece.y;
                             }
                         }
-                        
-                   
+
+
                     }
                 }
 
-                
-                
+
+
             })
 
 
@@ -387,8 +404,8 @@ class gameScene extends Phaser.Scene {
                 }
             })
         })
-    
-        
+
+
 
         console.log(this.piecesState)
         console.log(this.gameGrid)
@@ -410,7 +427,7 @@ class gameScene extends Phaser.Scene {
 
             return false;
 
-      
+
         })
 
 
@@ -427,72 +444,86 @@ class gameScene extends Phaser.Scene {
                 }
             }
         }))
-        
+
     }
 
     sendPieceToStart(piece) {
-        if (piece.type = 2) {
+        if (piece.type === 2) {
             if (piece.pieceNo === 1) {
-                
+                console.log("Sending Green Piece 1 to start", piece)
                 piece.x = 128
                 piece.y = 128
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
             if (piece.pieceNo === 2) {
+                console.log("Sending Green Piece 2 to start", piece)
                 piece.x = 192
                 piece.y = 128
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
             if (piece.pieceNo === 3) {
+                console.log("Sending Green Piece 3 to start", piece)
                 piece.x = 128
                 piece.y = 192
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
             if (piece.pieceNo === 4) {
+                console.log("Sending Green Piece 4 to start", piece)
                 piece.x = 192
                 piece.y = 192
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
-            
+
         }
 
-        if (piece.type = 4) {
+        if (piece.type === 4) {
             if (piece.pieceNo === 1) {
-
+                console.log("Sending Blue Piece 1 to start", piece)
                 piece.x = 704
                 piece.y = 704
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
             if (piece.pieceNo === 2) {
+                console.log("Sending Blue Piece 1 to start", piece)
                 piece.x = 704
                 piece.y = 768
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
             if (piece.pieceNo === 3) {
+                console.log("Sending Blue Piece 1 to start", piece)
                 piece.x = 768
                 piece.y = 704
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
             if (piece.pieceNo === 4) {
+                console.log("Sending Blue Piece 1 to start", piece)
                 piece.x = 768
                 piece.y = 768
                 let gameTile = this.findGridTileFromXandY(piece.x, piece.y)
                 piece.sprite.setPosition(piece.x + 32, piece.y + 32)
                 gameTile.pieces.push(piece)
+                this.updatePieceUI(gameTile)
             }
 
         }
@@ -519,21 +550,49 @@ class gameScene extends Phaser.Scene {
     }
 
     updatePieceUI(gridTile) {
-        let noOfGreen = 0
-        let noOfBlue = 0
-        let noOfRed = 0
-        let noOfYellow = 0
+      
+        let BlobType = this.isMixiBlob(gridTile)
 
-        
 
         if (gridTile.text != undefined) {
             gridTile.text.destroy()
-            
+
         }
         if (gridTile.pieces.length > 0) {
             this.clearMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1])
 
         }
+
+        if (BlobType.type === "mixBlueandGreen") {
+            console.log("mixiBlob")
+            this.changeMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1], "mixBlueandGreen")
+            this.putNumberOnPieceTwoColor(gridTile, BlobType.blueCount, BlobType.greenCount)
+        } else if (BlobType.type === "mixRedandYellow") {
+            this.changeMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1], "mixRedandYellow")
+            this.putNumberOnPieceTwoColor(gridTile, BlobType.redCount, BlobType.yellowCount)
+        } else {
+            if (BlobType.greenCount > 1) {
+                this.putNumberOnPieceOneColor(gridTile, BlobType.greenCount)
+            } else if (BlobType.blueCount > 1) {
+                this.putNumberOnPieceOneColor(gridTile, BlobType.blueCount)
+            } else if (BlobType.yellowCount > 1) {
+                this.putNumberOnPieceOneColor(gridTile, BlobType.yellowCount)
+            } else if (BlobType.redCount > 1) {
+                this.putNumberOnPieceOneColor(gridTile, BlobType.redCount)
+            }
+        }
+
+
+
+
+    }
+
+    isMixiBlob(gridTile) {
+        let noOfGreen = 0
+        let noOfBlue = 0
+        let noOfRed = 0
+        let noOfYellow = 0
+
         gridTile.pieces.forEach((piece) => {
             console.log(piece)
             if (piece.type === 2) {
@@ -544,33 +603,20 @@ class gameScene extends Phaser.Scene {
                 noOfYellow++
             } else if (piece.type === 5) {
                 noOfRed++
-           }
-
-           console.log(noOfBlue, noOfGreen)
-       })
-
-       
-        if (noOfGreen >= 1 && noOfBlue >= 1) {
-            console.log("mixiBlob")
-            this.changeMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1], "mixBlueandGreen")
-            this.putNumberOnPieceTwoColor(gridTile, noOfBlue, noOfGreen)
-        } else if (noOfRed >= 1 && noOfYellow >= 1) {
-            this.changeMixiBlobsImage(gridTile.pieces[gridTile.pieces.length - 1], "mixRedandYellow")
-            this.putNumberOnPieceTwoColor(gridTile, noOfRed, noOfYellow)
-        } else {
-            if (noOfGreen > 1) {
-                this.putNumberOnPieceOneColor(gridTile, noOfGreen)
-            } else if (noOfBlue > 1) {
-                this.putNumberOnPieceOneColor(gridTile, noOfBlue)
-            } else if (noOfYellow > 1) {
-                this.putNumberOnPieceOneColor(gridTile, noOfYellow)
-            } else if (noOfRed > 1) {
-                this.putNumberOnPieceOneColor(gridTile, noOfRed)
             }
-        }
 
-        
-        
+            console.log(noOfBlue, noOfGreen)
+        })
+
+        if (noOfGreen >= 1 && noOfBlue >= 1) {
+            return { type: "mixBlueandGreen", greenCount: noOfGreen, blueCount: noOfBlue, redCount: noOfRed, yellowCount: noOfYellow }
+        } else if (noOfRed >= 1 && noOfYellow >= 1) {
+            return { type: "mixRedandYellow", greenCount: noOfGreen, blueCount: noOfBlue, redCount: noOfRed, yellowCount: noOfYellow }
+        } else if (noOfRed >= 2 || noOfYellow >= 2 || noOfGreen >= 2 || noOfBlue >= 2) {
+            return { type: "pureBlob", greenCount: noOfGreen, blueCount: noOfBlue, redCount: noOfRed, yellowCount: noOfYellow }
+        } else {
+            return { type: "notBlob", greenCount: noOfGreen, blueCount: noOfBlue, redCount: noOfRed, yellowCount: noOfYellow }
+        }
 
     }
 
