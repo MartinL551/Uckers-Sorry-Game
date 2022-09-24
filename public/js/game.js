@@ -13,7 +13,7 @@ let gridMap = [
     [0, 5, 5, 5, 5, 0, 1, 5, 1, 0, 4, 4, 4, 4, 0],
     [0, 5, 5, 5, 5, 0, 1, 5, 1, 0, 4, 4, 4, 4, 0],
     [0, 5, 5, 5, 5, 5, 1, 5, 1, 0, 4, 4, 4, 4, 0],
-    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 7, 0, 0, 0]
+    [0, 0, 0, 8, 0, 0, 1, 1, 1, 0, 0, 7, 0, 0, 0]
 ]
 
 class gridTile {
@@ -49,6 +49,7 @@ class gameScene extends Phaser.Scene {
         super()
         this.gameGrid = [];
         this.piecesState = [];
+        this.currentTurn = "green"
     }
 
 
@@ -237,14 +238,20 @@ class gameScene extends Phaser.Scene {
 
 
                     rowArr.push(new gridTile(j * 64, i * 64, 7, rectangle, diceTextArr))
+                } else if (tile === 8) {
+                    let rectangle = this.add.rectangle(j * 64, i * 64, 128, 64, 64, 0x808080).setOrigin(0, 0);
+                    rectangle.setStrokeStyle(4, 0x000000)
+                    rectangle.setInteractive()
                 } else {
                     let rectangle = this.add.rectangle(j * 64, i * 64, 64, 64, 0x000000, 0).setOrigin(0, 0);
                     rowArr.push(new gridTile(j * 64, i * 64, 0, rectangle))
-                }
+                } 
             })
             this.gameGrid.push(rowArr);
         })
 
+
+        let turnText = this.add.text(0, 0 , "Green")
 
 
         initState(this.add, this.piecesState, this.gameGrid)
